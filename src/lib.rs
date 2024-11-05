@@ -454,6 +454,10 @@ where
             Outcome::NeedMore => {}
         }
     }
+
+    pub fn prompt(&mut self, newline:bool) {
+        self.inner.prompt(&mut self.interface, newline);
+    }
 }
 
 impl<'a, I, T> InnerRunner<'a, I, T>
