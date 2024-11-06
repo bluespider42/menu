@@ -16,7 +16,7 @@ pub type MenuCallbackFn<I, T> = fn(menu: &Menu<I, T>, interface: &mut I, context
 
 /// The type of function we call when we a valid command has been entered.
 pub type ItemCallbackFn<I, T> =
-    fn(menu: &Menu<I, T>, item: &Item<I, T>, args: &[&str], interface: &mut I, context: &mut T);
+fn(menu: &Menu<I, T>, item: &Item<I, T>, args: &[&str], interface: &mut I, context: &mut T);
 
 #[derive(Debug)]
 /// Describes a parameter to the command
@@ -455,8 +455,22 @@ where
         }
     }
 
-    pub fn prompt(&mut self, newline:bool) {
+    pub fn prompt(&mut self, newline: bool) {
         self.inner.prompt(&mut self.interface, newline);
+    }
+
+    pub fn print_indication<F, G>(&mut self, f: F) -> G
+    where
+        F: Fn(&mut I) -> G,
+    {
+        let g = f(&mut self.interface);
+        let buffer = self.buffer.as_mut();
+        if let Ok(s) = core::str::from_utf8(&buffer[0..self.used]) {
+            write!(self.interface, "\r").unwrap();
+            self.inner.prompt(&mut self.interface, false);
+            write!(self.interface, "{}", s).unwrap();
+        }
+        g
     }
 }
 
@@ -640,7 +654,7 @@ where
                                     parameter_name,
                                     help.unwrap_or(default_help),
                                 )
-                                .unwrap();
+                                    .unwrap();
                             }
                             Parameter::Optional {
                                 parameter_name,
@@ -652,7 +666,7 @@ where
                                     parameter_name,
                                     help.unwrap_or(default_help),
                                 )
-                                .unwrap();
+                                    .unwrap();
                             }
                             Parameter::Named {
                                 parameter_name,
@@ -664,7 +678,7 @@ where
                                     parameter_name,
                                     help.unwrap_or(default_help),
                                 )
-                                .unwrap();
+                                    .unwrap();
                             }
                             Parameter::NamedValue {
                                 parameter_name,
@@ -678,7 +692,7 @@ where
                                     argument_name,
                                     help.unwrap_or(default_help),
                                 )
-                                .unwrap();
+                                    .unwrap();
                             }
                         }
                     }
@@ -792,8 +806,7 @@ mod tests {
         _args: &[&str],
         _interface: &mut (),
         _context: &mut u32,
-    ) {
-    }
+    ) {}
 
     #[test]
     fn find_arg_mandatory() {
