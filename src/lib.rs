@@ -463,6 +463,7 @@ where
     where
         F: Fn(&mut I) -> G,
     {
+        write!(self.interface, "\r").unwrap();
         let g = f(&mut self.interface);
         let buffer = self.buffer.as_mut();
         if let Ok(s) = core::str::from_utf8(&buffer[0..self.used]) {
